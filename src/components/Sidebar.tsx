@@ -66,8 +66,8 @@ export function Sidebar({
       {/* Logo + progress */}
       <div className="border-b border-border px-4 py-4">
         <div className="flex items-center gap-2.5">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-accent">
-            <LayoutDashboard className="size-4 text-white" />
+          <div className="flex size-8 items-center justify-center rounded-lg bg-accent text-bg">
+            <LayoutDashboard className="size-4" />
           </div>
           <span className="text-base font-semibold">KG Lab</span>
         </div>
