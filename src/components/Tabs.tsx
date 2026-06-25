@@ -35,14 +35,14 @@ export function Tabs({
             type="button"
             onClick={() => onChange(tab.id)}
             className={[
-              'relative flex items-center gap-2 px-3 py-3 text-sm font-medium transition-colors',
-              isActive ? 'text-accent' : 'text-fg-muted hover:text-fg',
+              'relative flex items-center gap-2 px-3 py-3.5 text-sm font-medium transition-colors',
+              isActive ? 'text-fg' : 'text-fg-muted hover:text-fg',
             ].join(' ')}
           >
             <Icon className="size-4" />
             {tab.label}
             {isActive && (
-              <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-accent" />
+              <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-fg" />
             )}
           </button>
         )
