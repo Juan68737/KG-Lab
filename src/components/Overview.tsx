@@ -17,7 +17,7 @@ export function Overview() {
           </h1>
           <div className="mt-4 flex items-center gap-2">
             {c.tags.map((t) => (
-              <Badge key={t.label} tone={t.tone} size="md">
+              <Badge key={t.label} tone="neutral" size="md">
                 {t.label}
               </Badge>
             ))}
@@ -30,7 +30,7 @@ export function Overview() {
 
         <button
           type="button"
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border bg-surface-2 px-3.5 py-2 text-sm font-medium text-fg transition-colors hover:border-border-strong"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-3.5 py-2 text-sm font-medium text-fg transition-colors hover:border-border-strong"
         >
           Ask Claude
           <ArrowUpRight className="size-4 text-fg-subtle" />
@@ -38,15 +38,15 @@ export function Overview() {
       </div>
 
       {/* Agent integration callout */}
-      <div className="mt-6 flex items-center justify-between gap-4 rounded-xl border border-accent/20 bg-accent-soft p-4">
+      <div className="mt-6 flex items-center justify-between gap-4 rounded-2xl border border-border bg-surface-2 p-5">
         <div className="flex items-start gap-3">
-          <Bot className="mt-0.5 size-5 shrink-0 text-accent-fg" />
-          <p className="text-sm leading-relaxed text-accent-fg">{c.agentCallout}</p>
+          <Bot className="mt-0.5 size-5 shrink-0 text-fg" />
+          <p className="text-sm leading-relaxed text-fg-muted">{c.agentCallout}</p>
         </div>
         <button
           type="button"
           disabled
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-accent/30 px-3 py-1.5 text-sm font-medium text-accent-fg/60"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-fg-subtle"
         >
           Try in agent mode
           <ArrowUpRight className="size-4" />
@@ -56,7 +56,7 @@ export function Overview() {
       {/* Two cards */}
       <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-2">
         <Card label="How it works">
-          <div className="rounded-lg bg-surface-3/60 p-4">
+          <div className="rounded-xl bg-surface-3/60 p-4">
             <HnswDiagram />
           </div>
         </Card>
@@ -64,13 +64,13 @@ export function Overview() {
         <Card label="Key parameters">
           <div className="grid grid-cols-2 gap-3">
             {c.keyParameters.map((p) => (
-              <div key={p.value} className="rounded-lg bg-surface-3 p-4">
+              <div key={p.value} className="rounded-xl bg-surface-3 p-4">
                 <p className="font-mono text-2xl font-bold leading-none text-fg">{p.value}</p>
                 <p className="mt-2 text-xs leading-snug text-fg-subtle">{p.caption}</p>
               </div>
             ))}
           </div>
-          <p className="mt-3 rounded-lg bg-surface-3/60 p-4 text-sm leading-relaxed text-fg-muted">
+          <p className="mt-3 rounded-xl bg-surface-3/60 p-4 text-sm leading-relaxed text-fg-muted">
             {c.note}
           </p>
         </Card>
