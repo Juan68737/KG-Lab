@@ -1,9 +1,11 @@
 // Schematic of HNSW's layered graph: sparse top layers, dense bottom layer,
 // with a greedy descent path and the query-result node highlighted.
-const ACCENT = '#7c5cff'
-const DIM = '#3f3f46'
+// Colors are theme-aware (monochrome) via CSS variables; the result node keeps
+// its red highlight to match the mockup.
+const ACCENT = 'rgb(var(--fg))'
+const DIM = 'rgb(var(--fg-subtle))'
 const RESULT = '#ef4444'
-const LABEL = '#71717a'
+const LABEL = 'rgb(var(--fg-subtle))'
 
 // y positions for the three layers
 const L2 = 40
