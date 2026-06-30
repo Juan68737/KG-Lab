@@ -5,19 +5,19 @@ import { Sidebar } from './components/Sidebar'
 import { ContentPanel } from './components/ContentPanel'
 
 export default function App() {
-  // The active module in the sidebar. HNSW is the focus of the mockup.
-  const [activeModuleId, setActiveModuleId] = useState('hnsw')
+  // The active lesson in the sidebar. Module 0's first lesson is the default.
+  const [activeLessonId, setActiveLessonId] = useState('what-is-a-kg')
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
   return (
     <ThemeProvider>
       <div className="flex h-full w-full bg-bg text-fg">
         {sidebarOpen && (
-          <Sidebar activeModuleId={activeModuleId} onSelect={setActiveModuleId} />
+          <Sidebar activeLessonId={activeLessonId} onSelect={setActiveLessonId} />
         )}
         <div className="flex min-w-0 flex-1 flex-col">
           <Header onToggleSidebar={() => setSidebarOpen((o) => !o)} />
-          <ContentPanel moduleId={activeModuleId} />
+          <ContentPanel lessonId={activeLessonId} />
         </div>
       </div>
     </ThemeProvider>
