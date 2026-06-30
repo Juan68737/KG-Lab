@@ -13,7 +13,17 @@ All colors, fonts, radii, spacing, and component idioms are defined there. Do no
 hex values, font sizes, or paddings — use the tokens. If a genuinely new token is needed, add it
 to `DESIGN_SYSTEM.md` AND `tailwind.config.js` first, then use it.
 
-Dark theme only. One violet accent. Borders + surfaces for separation, not shadows.
+**Monochrome** (white/gray, no color fills except status badges). Supports **light + dark** via
+`[data-theme]` CSS variables — never branch component code on theme. Borders + surfaces for
+separation, not shadows.
+
+---
+
+## Product roadmap
+
+**Read [`ROADMAP.md`](./ROADMAP.md)** for the curriculum (Modules 0–5), the Playground vs Agent-mode
+distinction, the shared arXiv corpus, and the Python-vs-TS compute strategy. Current build scope:
+**Module 0 (Foundations) only — Modules 1–5 are locked.**
 
 ---
 
