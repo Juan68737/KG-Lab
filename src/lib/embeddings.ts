@@ -1,44 +1,6 @@
-// Real in-browser text embeddings via transformers.js (all-MiniLM-L6-v2),
-// plus similarity math and a tiny PCA for 2D projection. Used by the
-// Embeddings 101 playground. See ROADMAP.md §3 (tiered compute).
-// Type-only import is erased at build, so transformers.js stays OUT of the
-// static module graph. The library is pulled in lazily via dynamic import() the
-// first time the embeddings playground needs it — the rest of the app never
-// loads it.
-import type { FeatureExtractionPipeline } from '@xenova/transformers'
-
-let libPromise: Promise<typeof import('@xenova/transformers')> | null = null
-let extractorPromise: Promise<FeatureExtractionPipeline> | null = null
-
-function getLib() {
-  if (!libPromise) {
-    libPromise = import('@xenova/transformers').then((m) => {
-      m.env.allowLocalModels = false // always fetch from the HF hub
-      m.env.useBrowserCache = true
-      // Force single-threaded wasm: multi-threaded ORT needs SharedArrayBuffer,
-      // which requires cross-origin isolation (COOP/COEP) we don't set.
-      m.env.backends.onnx.wasm.numThreads = 1
-      return m
-    })
-  }
-  return libPromise
-}
-
-function getExtractor() {
-  if (!extractorPromise) {
-    extractorPromise = getLib().then((m) =>
-      m.pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', { quantized: true }),
-    )
-  }
-  return extractorPromise
-}
-
-/** Embed text into a raw (un-normalized) vector so dot/L2 differ from cosine. */
-export async function embedText(text: string): Promise<number[]> {
-  const extractor = await getExtractor()
-  const output = await extractor(text, { pooling: 'mean', normalize: false })
-  return Array.from(output.data as Float32Array)
-}
+// Similarity math + a tiny PCA for 2D projection. The vectors themselves come
+// from the Python backend (sentence-transformers) via src/lib/api.ts. See
+// ROADMAP.md §3 (compute tiers).
 
 // ---- similarity math ----
 
