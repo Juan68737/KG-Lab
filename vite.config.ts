@@ -7,4 +7,10 @@ export default defineConfig({
   resolve: {
     alias: { '@': path.resolve(__dirname, 'src') },
   },
+  // Proxy API calls to the FastAPI backend (run with `just api`).
+  server: {
+    proxy: {
+      '/api': 'http://localhost:8000',
+    },
+  },
 })

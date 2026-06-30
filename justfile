@@ -6,6 +6,11 @@
 
 set shell := ["bash", "-cu"]
 
+# Make uv (installed to ~/.local/bin) reachable from recipes even if the current
+# shell hasn't sourced ~/.local/bin/env yet (e.g. a terminal opened before uv
+# was installed). Also covers bun's default install dir.
+export PATH := env_var('HOME') / ".local/bin" + ":" + env_var('HOME') / ".bun/bin" + ":" + env_var('PATH')
+
 # Base branch every PR targets.
 base := "main"
 
@@ -13,13 +18,32 @@ base := "main"
 default:
     @just --list
 
-# Install dependencies.
+# Install all dependencies (frontend + Python backend).
 install:
     bun install
+    cd backend && uv sync
 
-# Start the Vite dev server.
-dev:
+# Run the whole app — frontend + backend — freeing both ports first.
+# This is the command to use day to day. Ctrl-C stops both.
+up: (_freeport "5173") (_freeport "8000")
+    #!/usr/bin/env bash
+    set -euo pipefail
+    trap 'kill 0' EXIT
+    (cd backend && uv run uvicorn app.main:app --reload --port 8000) &
+    bun run dev &
+    wait
+
+# Frontend only (Vite). Frees :5173 first.
+dev: (_freeport "5173")
     bun run dev
+
+# Backend only (FastAPI on :8000). Frees :8000 first.
+api: (_freeport "8000")
+    cd backend && uv run uvicorn app.main:app --reload --port 8000
+
+# Kill whatever is listening on a TCP port (private helper).
+_freeport port:
+    @pids=$(lsof -ti tcp:{{port}} 2>/dev/null || true); if [ -n "$pids" ]; then echo "freeing :{{port}} ($pids)"; kill -9 $pids 2>/dev/null || true; sleep 0.3; fi
 
 # Production build (typecheck + bundle).
 build:
