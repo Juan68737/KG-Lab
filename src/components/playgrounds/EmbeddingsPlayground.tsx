@@ -1,15 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Loader2, Plus, AlertTriangle } from 'lucide-react'
 import { PlaygroundShell } from './PlaygroundShell'
-import {
-  embedText,
-  computeBasis,
-  project,
-  cosine,
-  dot,
-  l2,
-  type PcaBasis,
-} from '../../lib/embeddings'
+import { embedTexts } from '../../lib/api'
+import { computeBasis, project, cosine, dot, l2, type PcaBasis } from '../../lib/embeddings'
 
 // Preset words in obvious clusters so "similar meaning → close together" is visible.
 const PRESETS = [
@@ -33,25 +26,19 @@ export function EmbeddingsPlayground() {
   const [adding, setAdding] = useState(false)
   const vecs = useRef(new Map<string, number[]>())
 
-  // Load model + embed presets + build the projection basis once.
+  // Embed all presets in one backend call, then build the projection basis.
   useEffect(() => {
     let cancelled = false
     ;(async () => {
       try {
         setStatus('loading')
-        const collected: number[][] = []
-        for (const w of PRESETS) {
-          const v = await embedText(w)
-          if (cancelled) return
-          vecs.current.set(w, v)
-          collected.push(v)
-        }
-        const b = computeBasis(collected)
+        const collected = await embedTexts(PRESETS)
         if (cancelled) return
-        setBasis(b)
+        PRESETS.forEach((w, i) => vecs.current.set(w, collected[i]))
+        setBasis(computeBasis(collected))
         setStatus('ready')
       } catch (e) {
-        console.error('[embeddings] load failed:', e)
+        console.error('[embeddings] backend request failed:', e)
         if (!cancelled) setStatus('error')
       }
     })()
@@ -88,7 +75,7 @@ export function EmbeddingsPlayground() {
     }
     try {
       setAdding(true)
-      const v = await embedText(text)
+      const [v] = await embedTexts([text])
       vecs.current.set(text, v)
       setWords((w) => (w.includes(text) ? w : [...w, text]))
       setSelected((p) => [...p, text].slice(-2))
@@ -113,18 +100,18 @@ export function EmbeddingsPlayground() {
       {status === 'loading' ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-surface-2 py-24 text-center">
           <Loader2 className="size-6 animate-spin text-fg-subtle" />
-          <p className="text-sm font-medium text-fg">Loading the embedding model…</p>
+          <p className="text-sm font-medium text-fg">Embedding words…</p>
           <p className="max-w-xs text-xs leading-relaxed text-fg-subtle">
-            ~23&nbsp;MB, downloaded once and cached in your browser. Runs fully on-device.
+            Computing sentence-transformers vectors on the Python backend.
           </p>
         </div>
       ) : status === 'error' ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-surface-2 py-24 text-center">
           <AlertTriangle className="size-6 text-amber-fg" />
-          <p className="text-sm font-medium text-fg">Couldn't load the model</p>
+          <p className="text-sm font-medium text-fg">Couldn't reach the backend</p>
           <p className="max-w-xs text-xs leading-relaxed text-fg-subtle">
-            The embedding model needs network access on first load. Check your connection and
-            reload.
+            The embeddings come from the Python API. Start it with{' '}
+            <span className="font-mono text-fg-muted">just api</span> and reload.
           </p>
         </div>
       ) : (
