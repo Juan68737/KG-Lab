@@ -60,40 +60,41 @@ the agent's tools stack instead of being six disconnected demos.
 
 ---
 
-## 3. Compute architecture — Python vs React/TS
+## 3. Compute architecture — Python backend + React client
 
-The field is Python; the app is React/TS. We resolve this by **separating what we show from what
-runs**. Three tiers:
+The field is Python; the app is React/TS. **Decision (locked):** real ML/NLP/KG work runs in a
+**Python FastAPI backend** using the actual libraries (spaCy, sentence-transformers, networkx,
+faiss, …). Playgrounds are **thin React clients** that call the API — the frontend never bundles ML.
+We chose real Python over hand-rolled JS so demos are honest, not toys. JS is kept only for **light
+visualization** (SVG graphs, layout, the bits with no real algorithm to fake).
 
-| Tier | Role | Tech | Runs where |
+| Layer | Role | Tech | Where |
 | --- | --- | --- | --- |
-| **Reference** | The "truth" — real library code | **Python** (faiss, sentence-transformers, networkx, leidenalg, PyG) | Shown in the **Code tab**, always |
-| **Interactive** | The live playground | **JS/WASM** — transformers.js (embeddings + rerankers), graphology (Node2Vec / Louvain / PageRank), hnswlib-wasm, pure-JS flat / IVF / BM25 / RRF | In-browser, ships on Vercel, **no backend** |
-| **Authentic** | Heavy / real-deal + agent loop | **Python FastAPI** (GNNs, ColBERT, large faiss, the LLM agent loop) | Optional backend, behind a "Run for real" toggle |
+| **Frontend** | UI + light viz | React/TS, SVG | Browser (Vercel) |
+| **Backend** | Real ML/NLP/KG + (later) agent loop | **Python FastAPI** + uv: spaCy, sentence-transformers, networkx, faiss, Claude API | `localhost:8000` in dev; hosted service in prod |
+| **Reference** | The "truth" shown in the Code tab | The same Python library code | Code tab |
 
-Principle: **show Python, run JS, escalate to a Python backend only where it matters.** Where a JS
-port isn't faithful (e.g. ColBERT), the UI says so and links the Python.
+Endpoints so far: `POST /api/extract` (spaCy NER + dependency relations), `POST /api/embed`
+(sentence-transformers vectors). Dev: Vite proxies `/api` → `:8000` (`just up` runs both).
 
-- **Why JS-first for playgrounds:** instant, no cold starts, deploys as a static Vercel site, drives
-  the visualizations directly.
-- **Why a backend is unavoidable for Agent mode:** the agent loop calls the Claude API (key must be
-  server-side). That service also hosts the KG tools the agent calls. Can be Python FastAPI or a TS
-  serverless function — TBD in Phase A4.
-- **Optional Pyodide** for Modules 0 & 3: numpy / networkx / scikit-learn run in-browser via
-  micropip, so the *actual shown Python* executes client-side (faiss/torch are not available).
-  A "the code you're reading is the code that ran" enhancement, not the spine (~10 MB load).
+- **Why a backend, not JS-in-browser:** real spaCy/faiss/sentence-transformers beat JS ports; the
+  agent loop needs a server anyway (Claude API key). One backend serves both playgrounds and agents.
+- **Runtime:** `uv` pins Python 3.12 (system Python is 3.14, which lacks some ML wheels). Models
+  lazy-load on first request so the server boots instantly.
+- **Deploy (later):** containerize the backend (python:3.12) → Railway/Render/Fly; frontend on
+  Vercel pointing at the API URL via an env var.
 
-### Per-technique compute map
+### Per-technique backend map
 
-| Technique | Interactive (browser) | Reference (Code tab) |
-| --- | --- | --- |
-| Flat kNN, IVF, BM25, RRF | pure JS | faiss / rank_bm25 |
-| Embeddings, cross-encoder rerank | transformers.js | sentence-transformers |
-| HNSW | hnswlib-wasm or JS port | hnswlib / faiss |
-| Node2Vec, Louvain/Leiden, PageRank, centrality | graphology | networkx / leidenalg |
-| Quantization (PQ/scalar) | JS demo | faiss |
-| GNNs, ColBERT | backend (or concept-only) | PyG / colbert-ai |
-| GraphRAG / KG-RAG / agent loop | backend | Python agent + Claude API |
+| Technique | Backend library |
+| --- | --- |
+| Embeddings | sentence-transformers (`all-MiniLM-L6-v2`) — **live** |
+| NER + relation extraction | spaCy (`en_core_web_sm`) — **live** |
+| Flat kNN, IVF, HNSW, quantization | faiss |
+| BM25 / RRF | rank_bm25 + numpy |
+| Node2Vec, Louvain/Leiden, PageRank, centrality | networkx |
+| GNNs, ColBERT | PyTorch / colbert-ai |
+| GraphRAG / KG-RAG / agent loop | Python agent + Claude API |
 
 ---
 

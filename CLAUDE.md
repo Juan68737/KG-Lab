@@ -45,12 +45,30 @@ The user strongly prefers **many small commits across clear phases** over one bi
 ## Project structure
 
 - `src/components/` — UI components (Sidebar, Tabs, Overview, cards…).
-- `src/data/` — module/content data (the learning modules list, HNSW content).
+- `src/components/playgrounds/` — per-lesson interactive playgrounds + registry.
+- `src/data/` — module/content data (the curriculum, per-lesson Overview content).
+- `src/lib/` — `api.ts` (backend client), `embeddings.ts` (similarity math + PCA).
 - `src/index.css` — Tailwind layers + CSS variables (font stacks, radius).
 - `tailwind.config.js` — design tokens as theme colors.
+- `backend/` — **Python FastAPI service** (`app/`): spaCy NLP + sentence-transformers
+  embeddings, later the agent loop. Managed with **uv** (Python 3.12).
+
+## Compute model
+
+Real ML/NLP runs in the **Python backend**, not the browser. Playgrounds are thin React
+clients that call the API; the frontend never bundles ML libs.
+- `POST /api/extract` → spaCy NER + dependency-parse relations
+- `POST /api/embed` → sentence-transformers vectors
+Vite proxies `/api` → `localhost:8000` in dev. See `ROADMAP.md §3`.
 
 ## Commands
 
-- `npm run dev` — local dev server (Vite)
-- `npm run build` — typecheck + production build
-- `npm run preview` — preview the build
+Use `just` (wraps bun + uv). Run `just` to list all.
+- `just up` — run **frontend + backend together** (most common)
+- `just dev` — Vite dev server only (frontend)
+- `just api` — FastAPI backend only (`uvicorn`, :8000)
+- `just install` — install frontend (`bun`) + backend (`uv sync`) deps
+- `just build` — typecheck + production build
+- `just pr "title"` — push current branch + open PR into main
+
+Playgrounds that hit the API (Embeddings, Text→structure) need the backend running.
