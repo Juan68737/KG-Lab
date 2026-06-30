@@ -143,6 +143,11 @@ uppercase; in-card section headings (e.g. "Key parameters") are sentence case, A
 
 - **Monochrome.** Active states, buttons, progress, tabs, callouts use white/gray (token
   `accent` = `fg`). The ONLY colored elements are status badges (done/active/new).
+- **Data-viz exception.** Interactive playground visualizations may use a small, muted categorical
+  palette to distinguish data classes (e.g. knowledge-graph entity types). This is the one place
+  color is allowed beyond status badges. Keep it restrained, define the palette in one data module
+  (e.g. `playgrounds/kgExplorerData.ts`), and ensure it reads on both themes. Chrome/UI around the
+  viz stays monochrome.
 - Support light + dark via `[data-theme]` CSS variables — never branch component code on theme.
 - No drop shadows on cards; separation comes from `border` + `surface-2`. Shadows allowed only on
   floating menus/popovers and the avatar's online dot.
