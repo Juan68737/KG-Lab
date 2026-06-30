@@ -6,6 +6,11 @@
 
 set shell := ["bash", "-cu"]
 
+# Make uv (installed to ~/.local/bin) reachable from recipes even if the current
+# shell hasn't sourced ~/.local/bin/env yet (e.g. a terminal opened before uv
+# was installed). Also covers bun's default install dir.
+export PATH := env_var('HOME') / ".local/bin" + ":" + env_var('HOME') / ".bun/bin" + ":" + env_var('PATH')
+
 # Base branch every PR targets.
 base := "main"
 
