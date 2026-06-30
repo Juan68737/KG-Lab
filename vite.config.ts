@@ -7,4 +7,11 @@ export default defineConfig({
   resolve: {
     alias: { '@': path.resolve(__dirname, 'src') },
   },
+  // Force esbuild to pre-bundle transformers.js + its onnxruntime-web dep.
+  // Without this, Vite serves onnxruntime-web's UMD bundle unbundled and its
+  // ESM interop breaks ("registerBackend of undefined"). We dynamic-import the
+  // lib, so list it explicitly (dynamic imports aren't always pre-scanned).
+  optimizeDeps: {
+    include: ['@xenova/transformers'],
+  },
 })
