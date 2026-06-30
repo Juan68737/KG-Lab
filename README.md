@@ -25,33 +25,50 @@ brew install just gh
 ## Quick start
 
 ```sh
-just install   # frontend (bun) + backend (uv sync) deps
-just up        # run frontend + backend together
+just install   # one-time: install frontend + backend deps
+just up        # run the whole app (frontend + backend)
 ```
 
-The Embeddings and Text→structure playgrounds call the Python backend, so it must be running
-(`just up` or `just api`). The first Embeddings request downloads the ~90 MB model once, then caches.
+Open http://localhost:5173. That's it.
 
-## Task runner (`just`)
+## Running the app
+
+The app has **two parts**: the **frontend** (the React UI, port 5173) and the **backend** (the
+Python API for embeddings + NLP, port 8000). Two playgrounds (Embeddings, Text→structure) call the
+backend, so it needs to be running.
+
+Pick whichever you prefer — both auto-kill anything already on their ports, so you never hit
+"address already in use":
+
+**One terminal (simplest):**
+```sh
+just up        # runs frontend + backend together; Ctrl-C stops both
+```
+
+**Two terminals (handy when debugging one side):**
+```sh
+just api       # terminal 1 — backend only  (Python API on :8000)
+just dev       # terminal 2 — frontend only (React UI on :5173)
+```
+
+> First time you open the Embeddings playground, the backend downloads the ~90 MB model once,
+> then caches it. The spaCy model is already installed by `just install`.
+
+## Commands
 
 Run `just` with no args to list everything.
 
-| Command | What it does |
-| --- | --- |
-| `just install` | Install frontend + backend dependencies |
-| `just up` | Run frontend + backend together |
-| `just dev` | Start the Vite dev server (frontend only) |
-| `just api` | Start the FastAPI backend on :8000 |
-| `just build` | Typecheck + production build |
-| `just preview` | Preview the production build |
-| `just typecheck` | Typecheck only |
-| `just pr "My PR title"` | Push the current branch and open a PR into `main` |
+| Command | What it does | When you use it |
+| --- | --- | --- |
+| `just up` | Run **frontend + backend** together | Day-to-day — the normal way to run the app |
+| `just dev` | Run the **frontend only** (React UI, :5173) | Backend already running in another terminal |
+| `just api` | Run the **backend only** (Python API, :8000) | Two-terminal setup, or testing the API |
+| `just install` | Install all deps (frontend `bun` + backend `uv`) | Once after cloning, or when deps change |
+| `just build` | Typecheck + production build | Before shipping / to catch type errors |
+| `just pr "Title"` | Push this branch + open a PR into `main` | When your work is ready for review |
 
-`just pr` defaults the PR head to your current branch, so usually you just run:
+`up` / `dev` / `api` are just different combos: `up` = `dev` + `api` in one terminal.
 
-```sh
-just pr "Add the justfile"
-```
-
-Override the branch if needed: `just pr "Title" some-branch`.
-(Requires the [GitHub CLI](https://cli.github.com); refuses to run from `main`.)
+`just pr` defaults to your current branch, so usually you just run `just pr "What you changed"`.
+Override the branch with `just pr "Title" some-branch`. (Needs the [GitHub CLI](https://cli.github.com);
+refuses to run from `main`.)
