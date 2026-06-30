@@ -3,6 +3,7 @@ import { Play, Bot, FileText, Code2, Lock } from 'lucide-react'
 import { Tabs, type TabId } from './Tabs'
 import { Overview } from './Overview'
 import { TabPlaceholder } from './TabPlaceholder'
+import { playgroundRegistry } from './playgrounds'
 import { allLessons } from '../data/modules'
 import { lessonContent } from '../data/lessons'
 
@@ -10,6 +11,7 @@ export function ContentPanel({ lessonId }: { lessonId: string }) {
   const [activeTab, setActiveTab] = useState<TabId>('overview')
   const lesson = allLessons.find((l) => l.id === lessonId)
   const content = lessonContent[lessonId]
+  const Playground = playgroundRegistry[lessonId]
 
   const locked = lesson?.status === 'locked'
   const hasOverview = !locked && !!content
@@ -36,11 +38,15 @@ export function ContentPanel({ lessonId }: { lessonId: string }) {
             />
           )
         ) : activeTab === 'playground' ? (
-          <TabPlaceholder
-            icon={Play}
-            title="Interactive playground"
-            description="Manipulate the algorithm directly — sliders, live queries, and visualizations. You drive; watch the mechanism."
-          />
+          Playground ? (
+            <Playground />
+          ) : (
+            <TabPlaceholder
+              icon={Play}
+              title="Interactive playground"
+              description="Manipulate the algorithm directly — sliders, live queries, and visualizations. You drive; watch the mechanism."
+            />
+          )
         ) : activeTab === 'agent' ? (
           <TabPlaceholder
             icon={Bot}
