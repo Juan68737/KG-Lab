@@ -23,22 +23,27 @@ install:
     bun install
     cd backend && uv sync
 
-# Start the Vite dev server (frontend only).
-dev:
-    bun run dev
-
-# Start the FastAPI backend (NLP + embeddings) on :8000.
-api:
-    cd backend && uv run uvicorn app.main:app --reload --port 8000
-
-# Run frontend + backend together (Ctrl-C stops both).
-up:
+# Run the whole app — frontend + backend — freeing both ports first.
+# This is the command to use day to day. Ctrl-C stops both.
+up: (_freeport "5173") (_freeport "8000")
     #!/usr/bin/env bash
     set -euo pipefail
     trap 'kill 0' EXIT
     (cd backend && uv run uvicorn app.main:app --reload --port 8000) &
     bun run dev &
     wait
+
+# Frontend only (Vite). Frees :5173 first.
+dev: (_freeport "5173")
+    bun run dev
+
+# Backend only (FastAPI on :8000). Frees :8000 first.
+api: (_freeport "8000")
+    cd backend && uv run uvicorn app.main:app --reload --port 8000
+
+# Kill whatever is listening on a TCP port (private helper).
+_freeport port:
+    @pids=$(lsof -ti tcp:{{port}} 2>/dev/null || true); if [ -n "$pids" ]; then echo "freeing :{{port}} ($pids)"; kill -9 $pids 2>/dev/null || true; sleep 0.3; fi
 
 # Production build (typecheck + bundle).
 build:
