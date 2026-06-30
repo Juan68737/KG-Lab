@@ -3,51 +3,61 @@ import { Play, Bot, FileText, Code2, Lock } from 'lucide-react'
 import { Tabs, type TabId } from './Tabs'
 import { Overview } from './Overview'
 import { TabPlaceholder } from './TabPlaceholder'
-import { allModules } from '../data/modules'
+import { allLessons } from '../data/modules'
+import { lessonContent } from '../data/lessons'
 
-export function ContentPanel({ moduleId }: { moduleId: string }) {
+export function ContentPanel({ lessonId }: { lessonId: string }) {
   const [activeTab, setActiveTab] = useState<TabId>('overview')
-  const module = allModules.find((m) => m.id === moduleId)
+  const lesson = allLessons.find((l) => l.id === lessonId)
+  const content = lessonContent[lessonId]
 
-  // Only HNSW has full content in this build; other modules show a locked state.
-  const isHnsw = moduleId === 'hnsw'
+  const locked = lesson?.status === 'locked'
+  const hasOverview = !locked && !!content
 
   return (
     <main className="flex h-full min-w-0 flex-1 flex-col bg-surface">
       <Tabs active={activeTab} onChange={setActiveTab} />
 
       <div className="no-scrollbar flex-1 overflow-y-auto">
-        {!isHnsw ? (
+        {locked ? (
           <TabPlaceholder
             icon={Lock}
-            title={`${module?.label ?? 'Module'} not unlocked yet`}
-            description="Complete the prior modules to unlock this lesson. HNSW is the active module — select it from the sidebar."
+            title={`${lesson?.label ?? 'Lesson'} is locked`}
+            description="This lesson unlocks in a later module. Module 0 — Foundations is available now; pick a lesson from the sidebar."
           />
         ) : activeTab === 'overview' ? (
-          <Overview />
+          hasOverview ? (
+            <Overview content={content} />
+          ) : (
+            <TabPlaceholder
+              icon={FileText}
+              title={`${lesson?.label ?? 'Lesson'} overview`}
+              description="Overview content for this lesson is coming soon."
+            />
+          )
         ) : activeTab === 'playground' ? (
           <TabPlaceholder
             icon={Play}
             title="Interactive playground"
-            description="Tune M and ef, watch the graph rebuild, and run live nearest-neighbor queries against a sample dataset."
+            description="Manipulate the algorithm directly — sliders, live queries, and visualizations. You drive; watch the mechanism."
           />
         ) : activeTab === 'agent' ? (
           <TabPlaceholder
             icon={Bot}
             title="Agent mode"
-            description="Drop HNSW into an agentic loop and watch it power episodic memory recall and tool retrieval in real time."
+            description="Give an AI agent a goal and watch it use this technique as a tool — reasoning and tool calls streamed live."
           />
         ) : activeTab === 'papers' ? (
           <TabPlaceholder
             icon={FileText}
             title="Papers & references"
-            description="The original Malkov & Yashunin HNSW paper plus follow-up work on filtered and disk-based variants."
+            description="Primary sources and follow-up reading for this lesson."
           />
         ) : (
           <TabPlaceholder
             icon={Code2}
             title="Reference implementation"
-            description="Copy-paste-ready HNSW snippets for pgvector, Weaviate, and a from-scratch Python build."
+            description="The real Python — the library code this lesson is based on."
           />
         )}
       </div>
