@@ -1,12 +1,16 @@
-import { Bot, Flame, ArrowUpRight } from 'lucide-react'
+import { Bot, Flame, ArrowUpRight, Check } from 'lucide-react'
 import { Badge } from './Badge'
 import { Card } from './Card'
 import { HnswDiagram } from './HnswDiagram'
-import { hnswContent } from '../data/hnsw'
+import { KnowledgeGraphDiagram } from './KnowledgeGraphDiagram'
+import type { LessonContent } from '../data/lessons'
 
-export function Overview() {
-  const c = hnswContent
+function Diagram({ kind }: { kind: NonNullable<LessonContent['diagram']> }) {
+  if (kind === 'hnsw') return <HnswDiagram />
+  return <KnowledgeGraphDiagram />
+}
 
+export function Overview({ content: c }: { content: LessonContent }) {
   return (
     <div className="mx-auto max-w-5xl px-8 py-7">
       {/* Title block */}
@@ -17,7 +21,7 @@ export function Overview() {
           </h1>
           <div className="mt-4 flex items-center gap-2">
             {c.tags.map((t) => (
-              <Badge key={t.label} tone="neutral" size="md">
+              <Badge key={t.label} tone={t.tone} size="md">
                 {t.label}
               </Badge>
             ))}
@@ -37,33 +41,38 @@ export function Overview() {
         </button>
       </div>
 
-      {/* Agent integration callout */}
+      {/* Callout */}
       <div className="mt-6 flex items-center justify-between gap-4 rounded-2xl border border-border bg-surface-2 p-5">
         <div className="flex items-start gap-3">
           <Bot className="mt-0.5 size-5 shrink-0 text-fg" />
-          <p className="text-sm leading-relaxed text-fg-muted">{c.agentCallout}</p>
+          <p className="text-sm leading-relaxed text-fg-muted">{c.callout}</p>
         </div>
-        <button
-          type="button"
-          disabled
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-fg-subtle"
-        >
-          Try in agent mode
-          <ArrowUpRight className="size-4" />
-        </button>
       </div>
 
       {/* Two cards */}
       <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <Card label="How it works">
-          <div className="rounded-xl bg-surface-3/60 p-4">
-            <HnswDiagram />
-          </div>
+        <Card label={c.howItWorksLabel ?? 'How it works'}>
+          {c.diagram ? (
+            <div className="rounded-xl bg-surface-3/60 p-4">
+              <Diagram kind={c.diagram} />
+            </div>
+          ) : (
+            <ul className="flex flex-col gap-2.5">
+              {c.howItWorks?.map((step) => (
+                <li key={step} className="flex items-start gap-2.5 text-sm text-fg-muted">
+                  <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-md bg-surface-3 text-fg">
+                    <Check className="size-3" />
+                  </span>
+                  {step}
+                </li>
+              ))}
+            </ul>
+          )}
         </Card>
 
-        <Card label="Key parameters">
+        <Card label={c.keyPointsLabel ?? 'Key ideas'}>
           <div className="grid grid-cols-2 gap-3">
-            {c.keyParameters.map((p) => (
+            {c.keyPoints.map((p) => (
               <div key={p.value} className="rounded-xl bg-surface-3 p-4">
                 <p className="font-mono text-2xl font-bold leading-none text-fg">{p.value}</p>
                 <p className="mt-2 text-xs leading-snug text-fg-subtle">{p.caption}</p>
