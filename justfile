@@ -13,13 +13,27 @@ base := "main"
 default:
     @just --list
 
-# Install dependencies.
+# Install all dependencies (frontend + Python backend).
 install:
     bun install
+    cd backend && uv sync
 
-# Start the Vite dev server.
+# Start the Vite dev server (frontend only).
 dev:
     bun run dev
+
+# Start the FastAPI backend (NLP + embeddings) on :8000.
+api:
+    cd backend && uv run uvicorn app.main:app --reload --port 8000
+
+# Run frontend + backend together (Ctrl-C stops both).
+up:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    trap 'kill 0' EXIT
+    (cd backend && uv run uvicorn app.main:app --reload --port 8000) &
+    bun run dev &
+    wait
 
 # Production build (typecheck + bundle).
 build:
