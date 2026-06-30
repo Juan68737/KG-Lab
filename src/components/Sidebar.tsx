@@ -1,14 +1,14 @@
 import { LayoutDashboard, Lock } from 'lucide-react'
 import { Badge } from './Badge'
 import {
-  moduleGroups,
+  modules,
   completedCount,
   totalCount,
-  type Module,
-  type ModuleStatus,
+  type Lesson,
+  type LessonStatus,
 } from '../data/modules'
 
-function StatusBadge({ status }: { status: ModuleStatus }) {
+function StatusBadge({ status }: { status: LessonStatus }) {
   if (status === 'done') return <Badge tone="green">done</Badge>
   if (status === 'active') return <Badge tone="amber">active</Badge>
   if (status === 'new') return <Badge tone="blue">new</Badge>
@@ -16,22 +16,22 @@ function StatusBadge({ status }: { status: ModuleStatus }) {
 }
 
 function NavItem({
-  module,
+  lesson,
   isActive,
   onSelect,
 }: {
-  module: Module
+  lesson: Lesson
   isActive: boolean
   onSelect: (id: string) => void
 }) {
-  const locked = module.status === 'locked'
-  const Icon = module.icon
+  const locked = lesson.status === 'locked'
+  const Icon = lesson.icon
 
   return (
     <button
       type="button"
       disabled={locked}
-      onClick={() => !locked && onSelect(module.id)}
+      onClick={() => !locked && onSelect(lesson.id)}
       className={[
         'group flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors',
         isActive
@@ -44,19 +44,19 @@ function NavItem({
       {locked ? (
         <Lock className="size-4 shrink-0 text-fg-subtle" />
       ) : (
-        <Icon className={`size-4 shrink-0 ${isActive ? 'text-accent-fg' : 'text-fg-subtle'}`} />
+        <Icon className={`size-4 shrink-0 ${isActive ? 'text-fg' : 'text-fg-subtle'}`} />
       )}
-      <span className="flex-1 truncate text-left">{module.label}</span>
-      <StatusBadge status={module.status} />
+      <span className="flex-1 truncate text-left">{lesson.label}</span>
+      <StatusBadge status={lesson.status} />
     </button>
   )
 }
 
 export function Sidebar({
-  activeModuleId,
+  activeLessonId,
   onSelect,
 }: {
-  activeModuleId: string
+  activeLessonId: string
   onSelect: (id: string) => void
 }) {
   const progress = Math.round((completedCount / totalCount) * 100)
@@ -78,24 +78,24 @@ export function Sidebar({
             <div className="h-full rounded-full bg-accent" style={{ width: `${progress}%` }} />
           </div>
           <p className="mt-2 text-xs text-fg-subtle">
-            {completedCount} of {totalCount} modules
+            {completedCount} of {totalCount} lessons
           </p>
         </div>
       </div>
 
-      {/* Grouped nav */}
+      {/* Modules 0–5 */}
       <nav className="no-scrollbar flex-1 overflow-y-auto px-2 py-3">
-        {moduleGroups.map((group) => (
-          <div key={group.label} className="mb-2">
-            <p className="mb-1 mt-3 px-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-fg-subtle">
-              {group.label}
+        {modules.map((module) => (
+          <div key={module.number} className="mb-2">
+            <p className="mb-1 mt-3 px-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-fg-subtle">
+              Module {module.number} · {module.title}
             </p>
             <div className="flex flex-col gap-1">
-              {group.modules.map((module) => (
+              {module.lessons.map((lesson) => (
                 <NavItem
-                  key={module.id}
-                  module={module}
-                  isActive={module.id === activeModuleId}
+                  key={lesson.id}
+                  lesson={lesson}
+                  isActive={lesson.id === activeLessonId}
                   onSelect={onSelect}
                 />
               ))}
